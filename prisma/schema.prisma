@@ -1,0 +1,180 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int         @id @default(autoincrement())
+  firstname  String?
+  lastname   String?
+  email      String      @unique
+  bio        String?
+  username   String?
+  password   String?
+  passwordResetToken     String? 
+  passwordResetExpires   DateTime?
+  status      String   @default("pending") // "active", "inactive", "new", "pending"
+  language   String      @default("English")
+  gender     String?
+  token      String?
+  lastLogin  DateTime?   @default(now())
+  created_at DateTime    @default(now())
+  active     Boolean     @default(false)
+  inActive   Boolean     @default(false)
+  usertype   Type        @default(ADMIN)
+  refreshToken  String?
+
+  userGroups UserGroup[]
+  
+  videos    Video[]  // 👈 Add this line (the opposite relation)
+}
+
+
+
+
+enum Type {
+  SUPER_ADMIN
+  ADMIN
+  INSTRUCTOR
+  LEARNER
+}
+
+
+
+model Group {
+  created_on  DateTime    @default(now())
+  id          Int         @id @default(autoincrement())
+  autoenroll  Boolean     @default(false)
+  description String
+  name        String?
+  groupkey    Boolean     @default(false)
+  userGroups  UserGroup[]
+}
+
+model File {
+  id         Int      @id @default(autoincrement())
+  name       String
+  tags       String
+  type       String
+  size       Int
+  uploadDate DateTime @default(now())
+  shared     Boolean  @default(false)
+}
+
+model UserGroup {
+  id             Int   @id @default(autoincrement())
+  userId         Int
+  groupcourseadd Int
+  groupId        Int               
+  group          Group @relation(fields: [groupId], references: [id])
+  user           User  @relation(fields: [userId], references: [id])
+}
+
+
+
+
+
+
+model Video {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  url         String
+  uploadedBy  Int?
+  user        User?    @relation(fields: [uploadedBy], references: [id])
+}
+
+model Course {
+  id          Int         @id @default(autoincrement())
+  title       String
+  description String?
+  image_url   String?
+  category    String?
+  price       Int         @default(0)
+  status      CourseStatus @default(DRAFT)
+
+  chapters     Chapter[]
+  attachments  Attachment[]
+
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Chapter {
+  id              Int        @id @default(autoincrement())
+  title           String
+  description     String?
+  video_url       String?
+  is_free_preview Boolean   @default(false)
+  status ChapterStatus @default(draft)   // ✔ correct
+
+  courseId   Int
+  course     Course   @relation(fields: [courseId], references: [id])
+
+  tests        Test[]
+  assignments  Assignment[]
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Assignment {
+  id          Int     @id @default(autoincrement())
+  title       String
+  description String?
+  file        String?
+
+  chapterId Int
+  chapter   Chapter @relation(fields: [chapterId], references: [id])
+}
+
+model Attachment {
+  id        Int    @id @default(autoincrement())
+  name      String
+  url       String?
+  size      Int?
+
+  courseId Int
+  course   Course @relation(fields: [courseId], references: [id])
+}
+
+model Test {
+  id        Int      @id @default(autoincrement())
+  type      TestType
+  question  String
+
+  // MCQ fields
+  options      String[]
+  answerIndex  Int?
+
+  // Ordering fields
+  steps String[]
+
+  // Match fields
+  pairs Json?  // [{left:'', right:''}]
+
+  chapterId Int
+  chapter   Chapter @relation(fields: [chapterId], references: [id])
+}
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ChapterStatus {
+  draft
+  published
+}
+
+enum TestType {
+  mcq
+  ordering
+  match
+}
