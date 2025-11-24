@@ -60,6 +60,9 @@ export const loginUser = async (req, res) => {
   data: { refreshToken: refreshToken },
 });
 const userId = user.id;
+const userType = user.usertype;
+console.log("userType:", userType);
+
 // ✅ Set refresh token in HTTP-only cookie
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
@@ -73,6 +76,7 @@ const userId = user.id;
     res.json({
       message: "Login successful",
       userId,
+      userType,
       accessToken,
       refreshToken,
     });
