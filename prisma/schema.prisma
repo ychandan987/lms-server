@@ -1,0 +1,122 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   Int       @id @default(autoincrement())
+  firstname            String?
+  lastname             String?
+  email                String    @unique
+  bio                  String?
+  username             String?
+  password             String?
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
+  status               String    @default("pending")
+  language             String    @default("English")
+  gender               String?
+  token                String?
+  lastLogin            DateTime? @default(now())
+  created_at           DateTime  @default(now())
+  active               Boolean   @default(false)
+  inActive             Boolean   @default(false)
+  usertype             Type      @default(ADMIN)
+  refreshToken         String?
+
+  userGroups UserGroup[]
+  progress   Progress[] // keep this
+}
+
+model Progress {
+  id          String    @id @default(cuid())
+  lessonId    String
+  userId      Int // 👈 MUST MATCH User.id (Int)
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  xpAwarded   Int       @default(0)
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+enum Type {
+  SUPER_ADMIN
+  ADMIN
+  INSTRUCTOR
+  LEARNER
+}
+
+model Group {
+  created_on  DateTime    @default(now())
+  id          Int         @id @default(autoincrement())
+  autoenroll  Boolean     @default(false)
+  description String
+  name        String?
+  groupkey    Boolean     @default(false)
+  userGroups  UserGroup[]
+}
+
+model File {
+  id         Int      @id @default(autoincrement())
+  name       String
+  tags       String
+  type       String
+  size       Int
+  uploadDate DateTime @default(now())
+  shared     Boolean  @default(false)
+}
+
+model UserGroup {
+  id             Int   @id @default(autoincrement())
+  userId         Int
+  groupcourseadd Int
+  groupId        Int
+  group          Group @relation(fields: [groupId], references: [id])
+  user           User  @relation(fields: [userId], references: [id])
+}
+
+model Course {
+  id                   String    @id @default(cuid())
+  title                String
+  description          String?
+  thumbnail            String?
+  published            Boolean   @default(false)
+  certificateAvailable Boolean   @default(true)
+  chapters             Chapter[]
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
+model Chapter {
+  id       String   @id @default(cuid())
+  title    String
+  courseId String
+  course   Course   @relation(fields: [courseId], references: [id])
+  lessons  Lesson[]
+}
+
+model Lesson {
+  id          String  @id @default(cuid())
+  title       String
+  description String?
+  content     String?
+
+  chapterId String
+  chapter   Chapter @relation(fields: [chapterId], references: [id])
+
+  quiz Quiz? // 👈 REQUIRED reverse relation
+}
+
+model Quiz {
+  id          String   @id @default(cuid())
+  question    String
+  options     String[] // ["Option 1", "Option 2"]
+  answerIndex Int
+  lessonId    String   @unique
+  lesson      Lesson   @relation(fields: [lessonId], references: [id])
+}
