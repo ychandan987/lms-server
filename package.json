@@ -2,12 +2,9 @@
   "name": "new_server",
   "version": "1.0.0",
   "description": "",
-<<<<<<< HEAD
-=======
   "keywords": [],
   "license": "ISC",
   "author": "",
->>>>>>> 217d915 (added and updated in office)
   "type": "module",
   "main": "server.js",
   "scripts": {
@@ -15,12 +12,9 @@
     "server": "nodemon server.js",
     "dev": "nodemon server.js"
   },
-<<<<<<< HEAD
   "keywords": [],
   "author": "",
   "license": "ISC",
-=======
->>>>>>> 217d915 (added and updated in office)
   "dependencies": {
     "@prisma/client": "^6.17.1",
     "axios": "^1.12.2",
