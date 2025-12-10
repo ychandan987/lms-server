@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
 /**
- * Generate Access Token
+ * Generate Access Token locally
  */
 export const generateAccessToken = (user) => {
   return jwt.sign(

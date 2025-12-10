@@ -9,6 +9,7 @@ import {
   verifyRefreshToken,
 } from "../utils/token.js";
 import crypto from "crypto";
+import { log } from "console";
 
 const prisma = new PrismaClient();
 const transporter = nodemailer.createTransport({
@@ -121,6 +122,8 @@ export const logoutUser = async (req, res) => {
     return res.status(204).json({ message: "No token" });
 
   const refreshToken = cookies.refreshToken;
+  console.log("Refresh Token on logout:", refreshToken);
+
 
   // Remove refreshToken from DB
   await prisma.user.updateMany({
